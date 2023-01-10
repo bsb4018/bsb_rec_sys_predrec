@@ -1,4 +1,4 @@
-from src.entity.aws_config import AwsStorage
+from src.entity.aws_cconfig import AwsStorage
 import tarfile
 from boto3 import Session
 import os

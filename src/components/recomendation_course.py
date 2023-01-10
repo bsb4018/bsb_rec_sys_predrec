@@ -13,7 +13,7 @@ class RecommendCourse:
 
     def recommend_by_similar_course(item_dict):
         try:
-            #load model from artifact
+            #load model from artifact from s3
             
             #use recommend function of the model to get the recommendation
             pass
