@@ -1,8 +1,7 @@
-from src.entity.aws_cconfig import AwsStorage
-import tarfile
+from src.entity.aws_config import AwsStorage
 from boto3 import Session
 import os
-
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH
 
 class StorageConnection:
     """
@@ -16,25 +15,29 @@ class StorageConnection:
         self.s3 = self.session.resource("s3")
         self.bucket = self.s3.Bucket(self.config.BUCKET_NAME)
 
-    def get_package_from_testing(self):
-        print("Fetching Artifacts From S3 Bucket .....")
-        if os.path.exists(self.config.ARTIFACTS_ROOT + "embeddings.ann"):
-            os.remove(self.config.ARTIFACTS_ROOT + "embeddings.ann")
-
-        if os.path.exists(self.config.ARTIFACTS_ROOT + "model.pth"):
-            os.remove(self.config.ARTIFACTS_ROOT + "model.pth")
-
-        if os.path.exists(self.config.ARTIFACTS_ROOT + "embeddings.json"):
-            os.remove(self.config.ARTIFACTS_ROOT + "embeddings.json")
-
-        self.bucket.download_file(self.config.ZIP_NAME, self.config.ARTIFACTS_PATH)
-        folder = tarfile.open(self.config.ARTIFACTS_PATH)
-        folder.extractall(self.config.ARTIFACTS_ROOT)
-        folder.close()
-        os.remove(self.config.ARTIFACTS_PATH)
-        print("Fetching Completed !")
+    def download_production_model_s3(self):
+        """
+        Download the contents of a folder directory
+        Args:
+            bucket_name: the name of the s3 bucket
+            s3_folder: the folder path in the s3 bucket
+            local_dir: a relative or absolute directory path in the local file system
+        """
+        
+        s3_folder = "saved_models"
+        local_dir = PRODUCTION_MODEL_FILE_PATH
+        bucket = self.bucket
+        for obj in bucket.objects.filter(Prefix=s3_folder):
+            target = obj.key if local_dir is None \
+                else os.path.join(local_dir, os.path.relpath(obj.key, s3_folder))
+            if not os.path.exists(os.path.dirname(target)):
+                os.makedirs(os.path.dirname(target))
+            if obj.key[-1] == '/':
+                continue
+            bucket.download_file(obj.key, target)
 
 
 if __name__ == "__main__":
     connection = StorageConnection()
-    connection.get_package_from_testing()
+    connection.download_production_model_s3()
+

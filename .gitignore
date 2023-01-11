@@ -134,4 +134,7 @@ dmypy.json
 .pyre/
 
 #Custom
+logs/
 scripts/
+production_model/
+src/components/get_features.py

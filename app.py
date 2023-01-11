@@ -82,11 +82,11 @@ def recommendations_by_similar_user_activity(item: User_Id):
     try:
         item_dict = item.dict()
         recommend_course = RecommendCourse()
-        status = recommend_course.recommend_by_similar_user_activity(item_dict)
+        status,recommend_course = recommend_course.recommend_by_similar_user_activity(item_dict)
         if status == True:
-            return {"Course Data Added Successfully"}
+            return recommend_course
         else:
-            return {"Invalid Data Entered"}
+            return {"No Recommendations Found"}
         
     except Exception as e:
         raise Response(f"Error Occured! {e}")
