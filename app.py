@@ -62,7 +62,7 @@ def get_recommendations_by_interest(item: Interest_Item):
 
 
 @app.post("/recommendations_by_course")
-def get_recommendations_by_similar_courses(item: Course_Name):
+def get_recommendations_by_similar_courses(item: User_Id):
     try:
         
         item_dict = item.dict()

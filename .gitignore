@@ -138,3 +138,6 @@ logs/
 scripts/
 production_model/
 src/components/get_features.py
+src/components/rec.ipynb
+src/components/rec2.ipynb
+src/components/production_model/

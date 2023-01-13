@@ -3,10 +3,11 @@ from src.logger import logging
 from src.exception import PredictionException
 from src.components.store_artifacts import StorageConnection
 from src.utils.main_utils import load_object
-from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,COURSES_MODEL_FILE_PATH,INTERACTIONS_MATRIX_FILE_PATH,FEATURE_STORE_FILE_PATH
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,COURSES_MODEL_FILE_PATH,INTERACTIONS_MATRIX_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
 from feast import FeatureStore
 import pandas as pd
 import json
+from pandasql import sqldf
 
 class RecommendCourse:
     def __init__(self):
@@ -18,6 +19,8 @@ class RecommendCourse:
     def recommend_by_similar_course(self,item_dict):
         try:
             #load model from artifact from s3
+            
+           
            
             #use recommend function of the model to get the recommendation
             pass
@@ -92,6 +95,22 @@ class RecommendCourse:
     def recommend_by_similar_interest(self,item_dict):
         try:
             #load model from artifact
+            courses_df = pd.read_parquet(path = COURSES_DATA_FILE_PATH)
+            tags = ""
+            if item_dict["data_sc"] == 1:
+                tags += "Web Development "
+            if item_dict["data_sc"] == 1:
+                tags += "Data Science "
+            if item_dict['data_an'] == 1:
+                tags += "Data Analysis "
+            if item_dict['game_dev'] == 1:
+                tags += "Game Development "
+            if item_dict['mob_dev'] == 1:
+                tags += "Mobile Development "
+            if item_dict['program'] == 1:
+                tags += "Programming "
+            if item_dict['cloud'] == 1:
+                tags += "Cloud "
             
             #use recommend function of the model to get the recommendation
             pass
