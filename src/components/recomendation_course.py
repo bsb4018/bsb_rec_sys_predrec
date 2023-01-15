@@ -2,28 +2,20 @@ import os,sys
 from src.logger import logging
 from src.exception import PredictionException
 from src.components.store_artifacts import StorageConnection
+from src.configurations.mongo_config import MongoDBClient
 from src.utils.main_utils import load_object
-from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,COURSES_MODEL_FILE_PATH,INTERACTIONS_MATRIX_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
 from feast import FeatureStore
 import pandas as pd
 import json
-from pandasql import sqldf
+import random
 
 class RecommendCourse:
     def __init__(self):
         try:
             self.store_artifacts = StorageConnection()
-        except Exception as e:
-            raise PredictionException(e,sys)
-
-    def recommend_by_similar_course(self,item_dict):
-        try:
-            #load model from artifact from s3
-            
-           
-           
-            #use recommend function of the model to get the recommendation
-            pass
+            self.mongo_client = MongoDBClient()
+            self.connection = self.mongo_client.dbcollection
         except Exception as e:
             raise PredictionException(e,sys)
 
@@ -94,25 +86,55 @@ class RecommendCourse:
 
     def recommend_by_similar_interest(self,item_dict):
         try:
-            #load model from artifact
-            courses_df = pd.read_parquet(path = COURSES_DATA_FILE_PATH)
-            tags = ""
+            courses = []
+            if item_dict["web_dev"] == 1:
+                tag = "web_dev"
+                courses.append(self._find_courses_interest(tag))
             if item_dict["data_sc"] == 1:
-                tags += "Web Development "
-            if item_dict["data_sc"] == 1:
-                tags += "Data Science "
+                tag = "data_sc"
+                courses.append(self._find_courses_interest(tag))
             if item_dict['data_an'] == 1:
-                tags += "Data Analysis "
+                tag = "data_an"
+                courses.append(self._find_courses_interest(tag))
             if item_dict['game_dev'] == 1:
-                tags += "Game Development "
+                tag = "game_dev"
+                courses.append(self._find_courses_interest(tag))
             if item_dict['mob_dev'] == 1:
-                tags += "Mobile Development "
+                tag = "mob_dev"
+                courses.append(self._find_courses_interest(tag))
             if item_dict['program'] == 1:
-                tags += "Programming "
+                tag = "program"
+                courses.append(self._find_courses_interest(tag))
             if item_dict['cloud'] == 1:
-                tags += "Cloud "
+                tag = "cloud"
+                courses.append(self._find_courses_interest(tag))
+
+            return courses
             
-            #use recommend function of the model to get the recommendation
-            pass
+        except Exception as e:
+            raise PredictionException(e,sys)
+
+    def _find_courses_interest(self,tag: str):
+        try:
+            randomnos = random.randint(1,20)
+            courses1 = self.connection.find({'category': tag}, {'_id': 0, 'course_name':1}).limit(1).skip(randomnos)
+            randomnos = random.randint(1,20)
+            courses2 = self.connection.find({'category': tag}, {'_id': 0, 'course_name':1}).limit(1).skip(randomnos)
+            randomnos = random.randint(1,20)
+            courses3 = self.connection.find({'category': tag}, {'_id': 0, 'course_name':1}).limit(1).skip(randomnos)
+            
+            recommended_list = []
+            clist = dict(courses1.next())
+            for _,val in clist.items():
+                recommended_list.append(val)
+            clist = dict(courses2.next())
+            for _,val in clist.items():
+                recommended_list.append(val)
+            clist = dict(courses3.next())
+            for _,val in clist.items():
+                recommended_list.append(val)
+
+            return recommended_list
+
         except Exception as e:
             raise PredictionException(e,sys)

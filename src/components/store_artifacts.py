@@ -1,4 +1,4 @@
-from src.entity.aws_config import AwsStorage
+from src.configurations.aws_config import AwsStorage
 from boto3 import Session
 import os
 from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH

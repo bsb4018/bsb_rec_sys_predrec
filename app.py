@@ -51,27 +51,8 @@ def get_recommendations_by_interest(item: Interest_Item):
         
         item_dict = item.dict()
         recommend_course = RecommendCourse()
-        status = recommend_course.recommend_by_similar_interest(item_dict)
-        if status == True:
-            return {"User_Course Interaction Added Successfully"}
-        else:
-            return {"Invalid Data Entered"}
-        
-    except Exception as e:
-        raise Response(f"Error Occured! {e}")
-
-
-@app.post("/recommendations_by_course")
-def get_recommendations_by_similar_courses(item: User_Id):
-    try:
-        
-        item_dict = item.dict()
-        recommend_course = RecommendCourse()
-        status = recommend_course.recommend_by_similar_course(item_dict)
-        if status == True:
-            return {"Course Data Added Successfully"}
-        else:
-            return {"Invalid Data Entered"}
+        recommend_course_list = recommend_course.recommend_by_similar_interest(item_dict)
+        return recommend_course_list
         
     except Exception as e:
         raise Response(f"Error Occured! {e}")
@@ -90,6 +71,23 @@ def recommendations_by_similar_user_activity(item: User_Id):
         
     except Exception as e:
         raise Response(f"Error Occured! {e}")
+
+'''
+@app.post("/recommendations_by_course")
+def get_recommendations_by_similar_courses(item: User_Id):
+    try:
+        
+        item_dict = item.dict()
+        recommend_course = RecommendCourse()
+        status = recommend_course.recommend_by_similar_course(item_dict)
+        if status == True:
+            return {"Course Data Added Successfully"}
+        else:
+            return {"Invalid Data Entered"}
+        
+    except Exception as e:
+        raise Response(f"Error Occured! {e}")
+'''
 
 
 if __name__ == "__main__":

@@ -12,6 +12,5 @@ boto3==1.24.82
 bentoml[all]
 feast==0.21.3
 implicit
-db-sqlite3
-pandasql
+pymongo
 -e .
