@@ -35,6 +35,9 @@ class StorageConnection:
             if obj.key[-1] == '/':
                 continue
             bucket.download_file(obj.key, target)
+    
+    def download_feature_store_registries_s3(self):
+        pass
 
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ class RecommendCourse:
     def recommend_by_similar_user_activity(self,item_dict):
         try:
             #load model from artifact
-            self.store_artifacts.download_production_model_s3()
+            #self.store_artifacts.download_production_model_s3()
             timestamps = list(map(int, os.listdir(PRODUCTION_MODEL_FILE_PATH)))
             latest_timestamp = max(timestamps)
             latest_production_interaction_model = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MODEL_FILE_PATH)
@@ -38,7 +38,7 @@ class RecommendCourse:
             ids, scores = interaction_model.recommend(user_id, interaction_matrix[user_id], N=5, filter_already_liked_items=False)
             cidx = ids.tolist()
 
-            self.store = FeatureStore(repo_path=FEATURE_STORE_FILE_PATH)
+            self.store = FeatureStore(repo_path="D:/work2/course_recommend_app/cr_data_collection/rec_sys_fs")
             course_data = self.store.get_online_features(features = \
             ["courses_df_feature_view:course_id",\
                 "courses_df_feature_view:course_name"],
@@ -75,11 +75,11 @@ class RecommendCourse:
                 recommendation_response = json.dumps(recomendations_format)
                 return False,recommendation_response
             else:
-                recomendations_format = dict({"Recommendation 1" : new_recommend_list[0],\
-                    "Recommendation 2" : new_recommend_list[1],"Recommendation 3" : new_recommend_list[2],\
+                recomendations_format = dict({"Recommendation 1" : new_recommend_list[0],
+                    "Recommendation 2" : new_recommend_list[1],"Recommendation 3" : new_recommend_list[2],
                         "Recommendation 4" : new_recommend_list[3],"Recommendation 5" : new_recommend_list[4]})
                 recommendation_response = json.dumps(recomendations_format)
-                return True,recommendation_response
+                return True,new_recommend_list              #recommendation_response
         except Exception as e:
             raise PredictionException(e,sys)
 

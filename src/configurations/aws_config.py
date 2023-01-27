@@ -10,3 +10,4 @@ class AwsStorage:
 
     def get_aws_storage_config(self):
         return self.__dict__
+
