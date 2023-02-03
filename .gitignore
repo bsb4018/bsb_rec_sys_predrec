@@ -141,3 +141,7 @@ src/components/get_features.py
 src/components/rec.ipynb
 src/components/rec2.ipynb
 src/components/production_model/
+src/components/get_data.py
+data-entity/
+data-feature/
+rec_sys_fs/
