@@ -3,8 +3,8 @@ from src.logger import logging
 from src.exception import PredictionException
 from src.components.store_artifacts import StorageConnection
 from src.configurations.mongo_config import MongoDBClient
-from src.utils.main_utils import load_object
-from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
+from src.utils.main_utils import load_object,read_json_file
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_SHAPE_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
 from feast import FeatureStore
 import pandas as pd
 import json
@@ -28,14 +28,15 @@ class RecommendCourse:
     def recommend_by_similar_user_activity(self,item_dict):
         try:
             #load model from artifact
-            #self.store_artifacts.download_production_model_s3()
+            self.store_artifacts.download_production_model_s3()
             timestamps = list(map(int, os.listdir(PRODUCTION_MODEL_FILE_PATH)))
             latest_timestamp = max(timestamps)
             latest_production_interaction_model = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MODEL_FILE_PATH)
-            latest_production_interaction_matrix = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_FILE_PATH)
+            latest_production_interaction_matrix_shape_file = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_SHAPE_FILE_PATH)
             interaction_model = load_object(latest_production_interaction_model)
-            interaction_matrix = load_object(latest_production_interaction_matrix).toarray()
-            n_users,n_items = interaction_matrix.shape
+
+            interaction_matrix_shape = read_json_file(latest_production_interaction_matrix_shape_file)
+            n_items = int(interaction_matrix_shape["n_items"])
 
             #get the user from input
             user_id = item_dict["user_id"]
@@ -47,8 +48,10 @@ class RecommendCourse:
             print(top_4_items)
             cidx = top_4_items.tolist()
             print(cidx)
+            for item in cidx:
+                item = item+1
 
-
+            
             course_data = []
             course1 = self.course_connection.find({'course_id': cidx[0]}, {'_id': 0, 'course_name':1}).next()
             course2 = self.course_connection.find({'course_id': cidx[1]}, {'_id': 0, 'course_name':1}).next()
@@ -58,18 +61,14 @@ class RecommendCourse:
             course_data.append(dict(course2).get("course_name"))
             course_data.append(dict(course3).get("course_name"))
             course_data.append(dict(course4).get("course_name"))
-
-
+            
 
             '''
-            store = FeatureStore(repo_path="rec_sys_fs")
-            course_data = store.get_online_features(
-                features = ["course_features:course_id","course_features:course_name"],
-                entity_rows=[{"course_feature_id": cidx[0]},
-                             {"course_feature_id": cidx[1]},
-                             {"course_feature_id": cidx[2]},
-                             {"course_feature_id": cidx[3]}]
-                             ).to_dict().get("course_name")
+            store = FeatureStore(repo_path="feature_repo")
+            course_data = store.get_online_features(features = ["course_features:course_id","course_features:course_name"],\
+                                                    entity_rows=[{"course_feature_id": cidx[0]},{"course_feature_id": cidx[1]},\
+                                                                 {"course_feature_id": cidx[2]},{"course_feature_id": cidx[3]}]\
+                                                                    ).to_dict().get("course_name")
             print(course_data)
             #coursesdf = pd.DataFrame(course_data)
             #print(coursesdf.head())
