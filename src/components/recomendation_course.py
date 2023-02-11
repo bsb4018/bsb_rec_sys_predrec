@@ -4,7 +4,7 @@ from src.exception import PredictionException
 from src.components.store_artifacts import StorageConnection
 from src.configurations.mongo_config import MongoDBClient
 from src.utils.main_utils import load_object,read_json_file
-from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_SHAPE_FILE_PATH,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_SHAPE_FILE_PATH,MODEL_USERS_MAP,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
 from feast import FeatureStore
 import pandas as pd
 import json
@@ -12,7 +12,7 @@ import random
 from lightfm import LightFM
 from lightfm.evaluation import auc_score
 import numpy as np
-
+from scipy import sparse
 
 class RecommendCourse:
     def __init__(self):
@@ -35,14 +35,17 @@ class RecommendCourse:
             latest_production_interaction_matrix_shape_file = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_SHAPE_FILE_PATH)
             interaction_model = load_object(latest_production_interaction_model)
 
+            user_feature_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_MAP))
+
             interaction_matrix_shape = read_json_file(latest_production_interaction_matrix_shape_file)
             n_items = int(interaction_matrix_shape["n_items"])
 
             #get the user from input
             user_id = item_dict["user_id"]
+            mapped_user_id = user_feature_map[user_id]
 
             #get recommendation
-            scores = interaction_model.predict(user_id, np.arange(n_items))
+            scores = interaction_model.predict(mapped_user_id, np.arange(n_items))
             top_items = np.argsort(-scores)
             top_4_items = top_items[0:4]
             print(top_4_items)
@@ -151,3 +154,73 @@ class RecommendCourse:
 
         except Exception as e:
             raise PredictionException(e,sys)
+        
+    def recommend_for_new_user(self,item_dict):
+        try:
+
+            #load model from artifact
+            self.store_artifacts.download_production_model_s3()
+            timestamps = list(map(int, os.listdir(PRODUCTION_MODEL_FILE_PATH)))
+            latest_timestamp = max(timestamps)
+            latest_production_interaction_model = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MODEL_FILE_PATH)
+            latest_production_interaction_matrix_shape_file = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_SHAPE_FILE_PATH)
+            interaction_model = load_object(latest_production_interaction_model)
+
+            user_feature_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_MAP))
+
+            interaction_matrix_shape = read_json_file(latest_production_interaction_matrix_shape_file)
+            n_items = int(interaction_matrix_shape["n_items"])
+
+
+            user_feature_list = []
+            for key, value in item_dict.items():
+                valstr = str(value)
+                keystr = str(key)
+                format_feature = keystr+":"+valstr
+                user_feature_list.append(format_feature)
+            
+                
+            new_user_features = self._format_newuser_input(user_feature_map, user_feature_list)
+
+            scores = interaction_model.predict(0, np.arange(n_items), user_features=new_user_features) # Here 0 means pick the first row of the user_features sparse matrix
+            
+            top_items = np.argsort(-scores)
+            top_4_items = top_items[0:4]
+
+            cidx = top_4_items.tolist()
+            print(cidx)
+            for item in cidx:
+                item = item+1
+
+            
+            course_data = []
+            course1 = self.course_connection.find({'course_id': cidx[0]}, {'_id': 0, 'course_name':1}).next()
+            course2 = self.course_connection.find({'course_id': cidx[1]}, {'_id': 0, 'course_name':1}).next()
+            course3 = self.course_connection.find({'course_id': cidx[2]}, {'_id': 0, 'course_name':1}).next()
+            course4 = self.course_connection.find({'course_id': cidx[3]}, {'_id': 0, 'course_name':1}).next()
+            course_data.append(dict(course1).get("course_name"))
+            course_data.append(dict(course2).get("course_name"))
+            course_data.append(dict(course3).get("course_name"))
+            course_data.append(dict(course4).get("course_name"))
+            
+            return True,course_data
+        except Exception as e:
+            raise PredictionException(e,sys)
+        
+    def _format_newuser_input(self,user_feature_map, user_feature_list):
+        #user_feature_map = user_feature_map  
+        num_features = len(user_feature_list)
+        normalised_val = 1.0 
+        target_indices = []
+        for feature in user_feature_list:
+            try:
+                target_indices.append(user_feature_map[feature])
+            except KeyError:
+                print("new user feature encountered '{}'".format(feature))
+                pass
+        #print("target indices: {}".format(target_indices))
+        new_user_features = np.zeros(len(user_feature_map.keys()))
+        for i in target_indices:
+            new_user_features[i] = normalised_val
+        new_user_features = sparse.csr_matrix(new_user_features)
+        return (new_user_features)

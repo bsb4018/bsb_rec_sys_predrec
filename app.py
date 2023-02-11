@@ -45,6 +45,18 @@ class Course_Name(BaseModel):
 class User_Id(BaseModel):
     user_id: int
 
+class New_User(BaseModel):
+    user_id: int
+    prev_web_dev: int
+    prev_data_sc: int
+    prev_data_an: int
+    prev_game_dev: int
+    prev_mob_dev: int
+    prev_program: int
+    prev_cloud: int
+    yrs_of_exp: int
+    no_certifications: int
+
 @app.post("/recommendations_by_interest")
 def get_recommendations_by_interest(item: Interest_Item):
     try:
@@ -64,6 +76,21 @@ def recommendations_by_similar_user_activity(item: User_Id):
         item_dict = item.dict()
         recommend_course = RecommendCourse()
         status,recommend_course = recommend_course.recommend_by_similar_user_activity(item_dict)
+        if status == True:
+            return recommend_course
+        else:
+            return {"No Recommendations Found"}
+        
+    except Exception as e:
+        raise Response(f"Error Occured! {e}")
+
+
+@app.post("/recommendations_by_new_user")
+def recommendations_for_new_user(item: New_User):
+    try:
+        item_dict = item.dict()
+        recommend_course = RecommendCourse()
+        status,recommend_course = recommend_course.recommend_for_new_user(item_dict)
         if status == True:
             return recommend_course
         else:
