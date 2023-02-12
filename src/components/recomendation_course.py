@@ -4,7 +4,7 @@ from src.exception import PredictionException
 from src.components.store_artifacts import StorageConnection
 from src.configurations.mongo_config import MongoDBClient
 from src.utils.main_utils import load_object,read_json_file
-from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_SHAPE_FILE_PATH,MODEL_USERS_MAP,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
+from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH,INTERACTIONS_MODEL_FILE_PATH,INTERACTIONS_MATRIX_SHAPE_FILE_PATH,MODEL_USERS_ID_MAP,MODEL_USERS_FEATURE_MAP,FEATURE_STORE_FILE_PATH,COURSES_DATA_FILE_PATH
 from feast import FeatureStore
 import pandas as pd
 import json
@@ -35,14 +35,14 @@ class RecommendCourse:
             latest_production_interaction_matrix_shape_file = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_SHAPE_FILE_PATH)
             interaction_model = load_object(latest_production_interaction_model)
 
-            user_feature_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_MAP))
+            user_id_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_ID_MAP))
 
             interaction_matrix_shape = read_json_file(latest_production_interaction_matrix_shape_file)
             n_items = int(interaction_matrix_shape["n_items"])
 
             #get the user from input
             user_id = item_dict["user_id"]
-            mapped_user_id = user_feature_map[user_id]
+            mapped_user_id = user_id_map[user_id]
 
             #get recommendation
             scores = interaction_model.predict(mapped_user_id, np.arange(n_items))
@@ -166,7 +166,7 @@ class RecommendCourse:
             latest_production_interaction_matrix_shape_file = os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", INTERACTIONS_MATRIX_SHAPE_FILE_PATH)
             interaction_model = load_object(latest_production_interaction_model)
 
-            user_feature_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_MAP))
+            user_feature_map = load_object(os.path.join(PRODUCTION_MODEL_FILE_PATH, f"{latest_timestamp}", MODEL_USERS_FEATURE_MAP))
 
             interaction_matrix_shape = read_json_file(latest_production_interaction_matrix_shape_file)
             n_items = int(interaction_matrix_shape["n_items"])
@@ -177,7 +177,7 @@ class RecommendCourse:
                 valstr = str(value)
                 keystr = str(key)
                 format_feature = keystr+":"+valstr
-                user_feature_list.append(format_feature)
+                user_feature_list.append(str(format_feature))
             
                 
             new_user_features = self._format_newuser_input(user_feature_map, user_feature_list)
