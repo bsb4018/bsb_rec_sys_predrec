@@ -70,7 +70,7 @@ def get_recommendations_by_interest(item: Interest_Item):
         raise Response(f"Error Occured! {e}")
 
 
-@app.post("/recommendations_by_user")
+@app.post("/recommendations_by_existing_user")
 def recommendations_by_similar_user_activity(item: User_Id):
     try:
         item_dict = item.dict()
