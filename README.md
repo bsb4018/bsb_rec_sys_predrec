@@ -8,7 +8,9 @@ Users Get Recommended in three ways
 
 ### Solution Proposed 
 For 1. We have Stored Courses Tagwise so we take input interest topic from API and do a Mongo DB Seacrh to recommend courses.
+
 For 2. We have trained a hybrid recommender System on user-course interaction features using LightFM framework, so we download the model and artifacts and take input the existing User ID and recommend courses based on the users with similar interactions.
+
 For 3. We have trained a hybrid recommender System on user features using LightFM framework, so we download the model and artifacts and take input the a new User ID and user features and recommend courses based on the user features.
 
 ## Tech Stack Used
@@ -18,7 +20,7 @@ For 3. We have trained a hybrid recommender System on user features using LightF
 5. MongoDB
 
 
-## Infrastructure Required.
+## Infrastructure Required
 1. AWS S3
 2. Git Actions
 3. AWS ECR
@@ -106,3 +108,97 @@ docker build --build-arg AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> --build-arg AWS_S
 ```
 docker run -d -p 8090:8090 <IMAGE_NAME>
 ```
+
+
+## Deployment Steps
+
+1. Check if the Dockerfile is available in the project directory
+
+2. Build the Docker image
+```
+docker build --build-arg AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> --build-arg AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> --build-arg AWS_REGION_NAME=<AWS_REGION_NAME> --build-arg MONGO_DB_URL_KEY=<MONGO_DB_URL> . 
+
+```
+
+3. Run the Docker image
+```
+docker run -d -p 8090:8090 <IMAGE_NAME>
+```
+
+## Deployment Steps
+
+1. Check if the Dockerfile is available in the project directory
+
+2. Build the Docker image
+```
+docker build --build-arg AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> --build-arg AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> --build-arg AWS_REGION_NAME=<AWS_REGION_NAME> --build-arg MONGO_DB_URL_KEY=<MONGO_DB_URL> . 
+
+```
+
+3. Run the Docker image
+```
+docker run -d -p 8090:8090 <IMAGE_NAME>
+```
+
+## Deployment Steps
+
+1. Login to AWS console.
+
+2. Create IAM user for deployment
+
+	with specific access
+	1. EC2 access : It is virtual machine
+
+	2. S3 bucket: To store artifact and model in s3 bucket
+
+	3. ECR: Elastic Container registry
+	To save your docker image in aws
+
+	Description: About the deployment
+
+	1. Build docker image of the source code
+	2. Push your docker image to ECR
+	3. Launch Your EC2 
+	4. Pull Your image from ECR in EC2
+	5. Lauch your docker image in EC2
+
+
+	Policy:
+	1. AmazonEC2ContainerRegistryFullAccess
+	2. AmazonEC2FullAccess
+	3. AmazonS3FullAccess
+
+3.Create a s3 bukcet in ap-south-1
+	bucket name: unqiue name
+	
+4. Create ECR repo to store/save docker image
+	
+5. Create EC2 machine  Ubuntu
+
+6. Open EC2 and Install docker in EC2 Machine 
+	
+	
+	#optinal
+	sudo apt-get update -y
+	sudo apt-get upgrade -y
+	
+	#required
+	curl -fsSL https://get.docker.com -o get-docker.sh
+	sudo sh get-docker.sh
+	sudo usermod -aG docker ubuntu
+	newgrp docker
+	
+7. Configure EC2 as self-hosted runner
+
+setting > actions > runner > new self hosted runner > choose os > run command one by one
+
+8. Setup github secrets
+
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION=ap-south-1
+AWS_ECR_LOGIN_URI
+ECR_REPOSITORY_NAME
+MONGO_DB_URL
+
+9. Do a new Git Commit
