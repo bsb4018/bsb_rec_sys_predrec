@@ -114,16 +114,16 @@ docker run -d -p 8090:8090 <IMAGE_NAME>
 
 1. Login to AWS console.
 
-2. Create IAM user for deployment
+2. Create IAM user for deployment with specific access
 
-	with specific access
 	1. EC2 access : It is virtual machine
 
 	2. S3 bucket: To store artifact and model in s3 bucket
 
 	3. ECR: Elastic Container registry
-	To save your docker image in aws
 
+	To save your docker image in aws
+    
 	Description: About the deployment
 
 	1. Build docker image of the source code
