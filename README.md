@@ -110,37 +110,7 @@ docker run -d -p 8090:8090 <IMAGE_NAME>
 ```
 
 
-## Deployment Steps
-
-1. Check if the Dockerfile is available in the project directory
-
-2. Build the Docker image
-```
-docker build --build-arg AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> --build-arg AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> --build-arg AWS_REGION_NAME=<AWS_REGION_NAME> --build-arg MONGO_DB_URL_KEY=<MONGO_DB_URL> . 
-
-```
-
-3. Run the Docker image
-```
-docker run -d -p 8090:8090 <IMAGE_NAME>
-```
-
-## Deployment Steps
-
-1. Check if the Dockerfile is available in the project directory
-
-2. Build the Docker image
-```
-docker build --build-arg AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> --build-arg AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> --build-arg AWS_REGION_NAME=<AWS_REGION_NAME> --build-arg MONGO_DB_URL_KEY=<MONGO_DB_URL> . 
-
-```
-
-3. Run the Docker image
-```
-docker run -d -p 8090:8090 <IMAGE_NAME>
-```
-
-## Deployment Steps
+## GitHub Actions + Cloud Deployment Steps
 
 1. Login to AWS console.
 
