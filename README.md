@@ -30,7 +30,7 @@ Before we run the project, make sure that you are having MongoDB in your local s
 
 
 ## Project Architecture
-![image]()
+![image](https://github.com/bsb4018/bsb_rec_sys_predrec/blob/main/images/model_serving.drawio.png)
 
 
 ### Step 1: Clone the repository
@@ -58,18 +58,23 @@ pip install -r requirements.txt
 Get the Training artifact Bucket name from Model trainer https://github.com/bsb4018/bsb_rec_sys_mti.git
 Goto src/constants/cloud_constants.py and replace the name S3_TRAINING_BUCKET_NAME accordingly
 
-Get the Mongo DB Collections Name from Data Store https://github.com/bsb4018/bsb_rec_sys_data_store.git
-Goto src/constants/cloud_constants.py and replace the names accordingly
-
-
 Get a note of the following
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 AWS_REGION_NAME
 ```
 
+### Step 5 - Get Mongo DB credentials
+```bash
+Get the Mongo DB Collections Name from Data Store https://github.com/bsb4018/bsb_rec_sys_data_store.git
+Goto src/constants/cloud_constants.py and replace the names accordingly
 
-### Step 5 - Export the environment variable
+Get a note of the following
+MONGO_DB_URL
+```
+
+
+### Step 6 - Export the environment variable
 ```bash
 export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
 
@@ -81,7 +86,7 @@ export MONGODB_URL_KEY =<MONGO_DB_URL>
 ```
 
 
-### Step 5 - Run locally
+### Step 7 - Run locally
 ```bash
 python app.py
 ```
