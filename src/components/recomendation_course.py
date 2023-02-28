@@ -30,7 +30,7 @@ class RecommendCourse:
             raise PredictionException(e,sys)
 
 
-    def recommend_by_similar_user_activity(self,item_dict):
+    def g(self,item_dict):
         '''
         Input:- Existing User ID [0-3999]
         Output: - Recommendation For the input User ID based on other simillar users
