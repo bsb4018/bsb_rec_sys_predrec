@@ -13,6 +13,7 @@ from lightfm import LightFM
 from lightfm.evaluation import auc_score
 import numpy as np
 from scipy import sparse
+from memory_profiler import profile
 
 class RecommendCourse:
     '''
@@ -29,8 +30,8 @@ class RecommendCourse:
         except Exception as e:
             raise PredictionException(e,sys)
 
-
-    def g(self,item_dict):
+    @profile
+    def recommend_by_similar_user_activity(self,item_dict):
         '''
         Input:- Existing User ID [0-3999]
         Output: - Recommendation For the input User ID based on other simillar users
@@ -90,7 +91,7 @@ class RecommendCourse:
         except Exception as e:
             raise PredictionException(e,sys)
 
-        
+    @profile    
     def recommend_for_new_user(self,item_dict):
         '''
         Input:- New User ID
@@ -182,7 +183,7 @@ class RecommendCourse:
         except Exception as e:
             raise PredictionException(e,sys)
 
-
+    @profile
     def recommend_by_similar_interest(self,item_dict):
         '''
         Input:- Interest Tags

@@ -4,7 +4,7 @@ import os,sys
 from src.logger import logging
 from src.exception import PredictionException
 from src.constants.file_constants import PRODUCTION_MODEL_FILE_PATH
-
+from memory_profiler import profile
 class StorageConnection:
     """
     Created connection with S3 bucket using boto3 api to fetch the model from Repository.
@@ -23,6 +23,7 @@ class StorageConnection:
         except Exception as e:
             raise PredictionException(e,sys)
 
+    @profile
     def download_production_model_s3(self):
         """
         Download the contents of a folder directory
